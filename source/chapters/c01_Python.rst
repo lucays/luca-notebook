@@ -8,4 +8,4 @@ Python笔记。
    :maxdepth: 2
    :glob:
 
-   ../c1/*
+   ../c01/*

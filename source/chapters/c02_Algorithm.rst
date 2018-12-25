@@ -8,4 +8,4 @@ Algorithm笔记。
    :maxdepth: 2
    :glob:
 
-   ../c1/*
+   ../c02/*
