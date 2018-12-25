@@ -127,9 +127,9 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'luca-notebookdoc'
 
-html_favicon = 'favicon.jpg'
+html_favicon = '_static/favicon.jpg'
 
-html_logo = 'logo.jpg'
+html_logo = '_static/logo.jpg'
 
 html_last_updated_fmt = '%Y-%m-%d %H:%M:%S'
 

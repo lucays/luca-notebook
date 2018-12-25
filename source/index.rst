@@ -10,6 +10,7 @@ Welcome to luca-notebook's documentation!
 
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
+   :glob:
+   :caption: 目录:
 
    chapters/*
