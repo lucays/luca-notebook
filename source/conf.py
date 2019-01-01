@@ -92,7 +92,6 @@ html_theme_options = {
 html_sidebars = {
     '**': [
         'logo.html',
-        'description.html',
         'docstatus.html',
         'github.html',
         'globaltoc.html',
@@ -127,11 +126,9 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'luca-notebookdoc'
 
-html_favicon = '_static/favicon.jpg'
+html_favicon = '_static/favicon.png'
 
-html_logo = '_static/logo.jpg'
-
-html_last_updated_fmt = '%Y-%m-%d %H:%M:%S'
+html_logo = '_static/logo.png'
 
 # -- Options for LaTeX output ------------------------------------------------
 
