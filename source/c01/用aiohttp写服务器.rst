@@ -103,7 +103,7 @@
 
 .. __: https://stackoverflow.com/questions/47675410/python-asyncio-aiohttp-valueerror-too-many-file-descriptors-in-select-on-win
 
-.. note:: `这篇文章 <https://blog.magentaize.net/fix-python-too-many-file-descriptors-in-select-in-windows/>`__ 指出应该是 `Python` 的锅，限制了并发数最多为512。
+.. note:: `这篇文章 <https://blog.magentaize.net/fix-python-too-many-file-descriptors-in-select-in-windows/>`__ 指出应该是 ``Python`` 的锅，限制了并发数最多为512。
 
 .. code::
 
