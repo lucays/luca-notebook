@@ -83,7 +83,7 @@ pygments_style = None
 html_theme = 'sphinx_typlog_theme'
 html_theme_path = [sphinx_typlog_theme.get_path()]
 html_theme_options = {
-    'logo': 'logo.jpg',
+    'logo': 'logo.png',
     'color': 'rgba(3, 172, 244, 0.8)',
     'description': '个人博客 by 碎冰',
     'github_user': 'lucays',
