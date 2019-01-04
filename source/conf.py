@@ -88,6 +88,8 @@ html_theme_options = {
     'description': '个人博客 by 碎冰',
     'github_user': 'lucays',
     'github_repo': 'luca-notebook',
+    'canonical_url': 'https://luca-notebook.readthedocs.io',
+    'analytics_id': 'UA-131764005-2',
 }
 html_sidebars = {
     '**': [
