@@ -187,6 +187,9 @@
 
 .. code::
 
+    import aiomysql
+
+
     async def create_aiomysql(app):
         mysql_conf = app['config']['mysql']
         host, port, user, password, db = mysql_conf['host'], mysql_conf['port'], mysql_conf['user'], mysql_conf['password'], mysql_conf['db']
@@ -213,6 +216,9 @@
         app['mysql_engine'].close()
         await app['mysql_engine'].wait_closed()
     
+接着在\ ``main.py``\ 中注册：
+
+.. code::
 
     app.cleanup_ctx.append(mysql_engine)
 
@@ -234,3 +240,60 @@
 | 如果上面这段未能成功运行，\ ``self._exits``\ 就不会放入数据，于是之后的清理代码就不会执行。
 | 这样，就保证了清理代码一定是在成功初始化后才执行。
 | 最后，在\ ``_on_cleanup``\ 中，反转\ ``self._exits``\ ，从末尾的异步生成器开始，每个异步生成器执行\ ``yield``\ 之后的清理程序。
+
+创建后台任务
+=============
+
+| 在一个web应用中，经常需要在后台定时或以其他方式运行一些后台任务。
+| 例如，在写爬虫的存储部分时，可以通过\ ``requests``\ 等\ ``post``\ 到服务器的方式，统一让web应用来处理抓取的内容如何入库，这时就可能需要一个后台任务定时获取数据库中的某个范围（如几天内）的\ ``url``\ 。
+
+| 以下是一个简单的例子，在\ ``db.py``\ 中添加如下代码，通过\ ``while True``\ 无限循环，可以从一个名为\ ``crawl_result``\ 的表中定时获取2000个url：
+
+.. code::
+
+    import asyncio
+
+
+    async def get_old_urls(app):
+        while True:
+            async with app['mysql_engine'].acquire() as conn:
+                async with conn.cursor() as cur:
+                    sql = "select url from crawl_result where link!='' limit 2000"
+                    await cur.execute(sql)
+                    app['old_urls'] = {url for url, in await cur.fetchall()}
+            interval = float(app['config']['update_interval'])
+            await asyncio.sleep(3600*interval)  # 每隔interval小时运行一次
+
+
+    async def start_background_tasks(app):
+        app['get_old_urls'] = app.loop.create_task(get_old_urls(app))
+
+
+    async def cleanup_background_tasks(app):
+        app['get_old_urls'].cancel()
+        await app['get_old_urls']
+
+接着在\ ``main.py``\ 中注册：
+
+.. code::
+
+    app.on_startup.append(start_background_tasks)
+    app.on_cleanup.append(cleanup_background_tasks)
+
+同样的，上述代码中，\ ``start_background_tasks``\ 和\ ``cleanup_background_tasks``\ 可以改成：
+
+.. code::
+
+    async def background_tasks(app):
+        app['get_old_urls'] = app.loop.create_task(get_old_urls(app))
+        yield
+        app['get_old_urls'].cancel()
+        await app['get_old_urls']
+
+再在\ ``main.py``\ 中添加：
+
+.. code::
+
+    app.cleanup_ctx.append(background_tasks)
+
+这样，就创建了一个简单的后台任务。
