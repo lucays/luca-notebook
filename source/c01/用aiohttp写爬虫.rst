@@ -152,28 +152,6 @@
                     print(f"{id_}, {url}: ERROR")
             return datas
 
-.. note:: 对于上面的 错误处理_ 的解决办法，直接在for循环中这么写：
-
-   .. code::
-
-    async def fetch_all(urls, loop):
-        '''
-        urls: list[(id_, url)]
-        '''
-        async with aiohttp.ClientSession() as session:
-            for id_, url in urls:
-                # 在Python3.7+，asyncio.ensure_future() 改名为 asyncio.create_task()
-                task = asyncio.ensure_future(fetch(session, id_, url))
-                task.add_done_callback(get_result)
-                loop.run_until_complete(task)
-            return datas
-    
-
-    urls = [(i, f'https://www.baidu.com/s?wd=python&pn={10*i}') for i in range(2000)]
-    loop = asyncio.get_event_loop()
-    fetch_all(urls, loop)
-    loop.close()
-
 在Python官方文档中，`add_done_callback`__ 应当仅在底层代码中使用。即使 ``future`` 抛出异常，也会 ``callback``，让异常在 ``future.result()`` 处抛出。并且给这个函数传递参数也不太方便。
 
 .. __: https://docs.python.org/3/library/asyncio-task.html#asyncio.Task.add_done_callback
