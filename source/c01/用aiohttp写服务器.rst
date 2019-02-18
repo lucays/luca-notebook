@@ -297,3 +297,98 @@
     app.cleanup_ctx.append(background_tasks)
 
 这样，就创建了一个简单的后台任务。
+
+基于类的视图
+==============
+
+把视图函数改成基于类的视图会更加灵活紧凑。
+对于之前的代码：
+
+.. code::
+
+    @routes.get('/test')
+    async def get_conf(request):
+        old_urls = request.app['old_urls']
+        head_urls = old_urls[:100]
+        return web.Response(text=f'first 100 urls: {head_urls}')
+
+可以改成：
+
+.. code::
+
+    @routes.view('/test')
+    class Test(web.View):
+        async def get(self):
+            old_urls = self.request.app['old_urls']
+            head_urls = old_urls[:100]
+            return web.Response(text=f'first 100 urls: {head_urls}')
+
+        async def post(self):
+            post_data = await self.request.post()
+            data = {k: v for k, v in post_data.items()}
+            return web.json_response(f'{data}')
+
+这个例子中还添加了1个post方法。
+
+.. note::
+
+    \ ``web.json_response(f'{data}')``\ 方法返回的其实是个\ ``str``\ ，用\ ``requests.get()``\ 后用\ ``response.json()``\ 方法后仍有可能还是\ ``str``\ 需要再次转换，这时可能是单引号字符串，可以用\ ``demjson.decode()``\ 转换，如果要用标准库\ ``json.loads()``\ 方法，需要先把单引号替换成双引号，也就是\ ``str.replace("'", '"')``\ 。
+
+模板
+======
+
+\ ``aiohttp``\ 有一个第三方库\ ``aiohttp_jinja2``\ 支持模板。
+
+在\ ``main.py``\ 中引入\ ``aiohttp_jinja2``\ 的基本代码：
+
+.. code::
+
+    from aiohttp import web
+    import jinja2
+    import aiohttp_jinja2
+
+    from settings import config
+
+    from views import routes
+
+
+    if __name__ == '__main__':
+        app = web.Application()
+        aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
+        app['config'] = config
+        app.add_routes(routes)
+        web.run_app(app)
+
+在\ ``views.py``\ 中的视图函数添加装饰器注明\ ``html``\ 文件的路径。这个装饰器要位于路由装饰器之下。
+
+.. code::
+
+    @routes.view('/hello')
+    @aiohttp_jinja2.template('hello/base.html')
+    class Hello(web.View):
+        async def get(self):
+            return {'result': "hello world"}
+
+这样表示\ ``html``\ 文件是\ ``templates/hello/base.html``\ 。需要这样新建文件夹和文件。
+
+静态文件
+---------
+
+| 新建\ ``static/css/style.css``\ 等文件夹和文件，\ ``static``\ 文件夹和\ ``templates``\ 文件夹同一目录。
+| 在\ ``html``\ 文件简单写几行代码引入这个\ ``css``\ ：
+
+.. code::
+
+    <head>
+        <link rel="stylesheet" href="{{ static('css/style.css') }}" type="text/css" />
+    </head>
+
+然后，在\ ``main.py``\ 中添加2行代码：
+
+.. code::
+
+    app['static_root_url'] = 'static'
+    app.router.add_static('/static/', path='./static', name='static')
+
+就能成功引入这个\ ``style.css``\ 文件。
+
