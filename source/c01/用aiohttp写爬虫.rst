@@ -2,15 +2,15 @@
 用aiohttp写爬虫
 =====================
 
-| `aiohttp`__ 可以用来写异步爬虫以及作为异步服务器，性能会比同步的模块提高不少。
-| 本篇介绍如何用 ``aiohttp`` 写异步爬虫。
+| `aiohttp`__\ 可以用来写异步爬虫以及作为异步服务器，性能会比同步的模块提高不少。
+| 本篇介绍如何用\ ``aiohttp``\ 写异步爬虫。
 
 .. __: https://docs.aiohttp.org
 
 基本介绍
 ==========
 
-首先，来看看 ``requests`` 是如何写爬虫的：
+首先，来看看\ ``requests``\ 是如何写爬虫的：
 
 .. code::
 
@@ -29,7 +29,7 @@
 
     fetch('https://www.baidu.com')
 
-把上述代码用 ``aiohttp`` 改写：
+把上述代码用\ ``aiohttp``\ 改写：
 
 .. code:: Python
 
@@ -50,9 +50,9 @@
     loop.close()
 
 | 以上是基本的改写。
-| ``resp.text()`` 有1个参数：``encoding``： 
+| ``resp.text()``\ 有1个参数：``encoding``： 
 
-- ``encoding=None`` 是默认参数，这时相当于上面的 ``resp.encoding = resp.apparent_encoding``\ ，会检测网页的编码。如果结果不对出现乱码，再才需要明确正确的编码：``resp.text(encoding='utf8')``\ 。另外，已知正确的编码也可以显式声明，因为检测编码有点影响性能。
+- ``encoding=None``\ 是默认参数，这时相当于上面的\ ``resp.encoding = resp.apparent_encoding``\ ，会检测网页的编码。如果结果不对出现乱码，再才需要明确正确的编码：``resp.text(encoding='utf8')``\ 。另外，已知正确的编码也可以显式声明，因为检测编码有点影响性能。
 
 .. note:: 从 ``requests`` 源码可知，检测编码用的是 ``chardet`` 模块：``encoding = chardet.detect(content)['encoding']`` 。
 
@@ -99,11 +99,11 @@
 错误处理
 ==========
 
-如果url太多，可能会报错 ``ValueError: too many file descriptors in select()`` ，根据 `stackoverflow`__ 所述，``aiohttp`` 默认设置中一次可以打开100个连接，而Windows一次最多只能打开64个 ``socket``，所以可以在 ``fetch_all`` 中添加一行：
+如果url太多，可能会报错\ ``ValueError: too many file descriptors in select()``\ ，根据\ `stackoverflow`__\ 所述，``aiohttp``\ 默认设置中一次可以打开100个连接，而Windows一次最多只能打开64个\ ``socket``\，所以可以在\ ``fetch_all``\ 中添加一行：
 
 .. __: https://stackoverflow.com/questions/47675410/python-asyncio-aiohttp-valueerror-too-many-file-descriptors-in-select-on-win
 
-.. note:: `这篇文章 <https://blog.magentaize.net/fix-python-too-many-file-descriptors-in-select-in-windows/>`__ 指出应该是 ``Python`` 的锅，限制了并发数最多为512。
+.. note:: `这篇文章 <https://blog.magentaize.net/fix-python-too-many-file-descriptors-in-select-in-windows/>`__ 指出应该是\ ``Python``\ 的锅，限制了并发数最多为512。
 
 .. code::
 
@@ -116,7 +116,7 @@
 回调
 =======
 
-对获取的html用 ``lxml`` 等处理时，可以使用回调。上述代码中，添加如下处理函数：
+对获取的html用\ ``lxml``\ 等处理时，可以使用回调。上述代码中，添加如下处理函数：
 
 .. code::
 
@@ -129,7 +129,7 @@
         for i in html.xpath('//h3/a'):
             print(i.xpath('string(.)'), i.xpath('@href')[0])
 
-之后需要改写 ``fetch_all`` 函数：
+之后需要改写\ ``fetch_all``\ 函数：
 
 .. code::
 
@@ -152,7 +152,7 @@
                     print(f"{id_}, {url}: ERROR")
             return datas
 
-在Python官方文档中，`add_done_callback`__ 应当仅在底层代码中使用。即使 ``future`` 抛出异常，也会 ``callback``，让异常在 ``future.result()`` 处抛出。并且给这个函数传递参数也不太方便。
+在Python官方文档中，`add_done_callback`__\ 应当仅在底层代码中使用。即使\ ``future``\ 抛出异常，也会\ ``callback``，让异常在\ ``future.result()``\ 处抛出。并且给这个函数传递参数也不太方便。
 
 .. __: https://docs.python.org/3/library/asyncio-task.html#asyncio.Task.add_done_callback
 
@@ -194,7 +194,7 @@
                     print(f"{id_}, {url}: ERROR")
             return datas
 
-如果不使用回调，那么可以写进 ``fetch`` 函数中：
+如果不使用回调，那么可以写进\ ``fetch``\ 函数中：
 
 .. code::
 
@@ -209,4 +209,4 @@
         except Exception:
             print(f"{id_}, url: {url} error happened:")
 
-不过，这样会模糊 ``fetch`` 函数的功能。
+不过，这样会模糊\ ``fetch``\ 函数的功能。
