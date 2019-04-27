@@ -1,0 +1,165 @@
+============
+动态规划
+============
+
+基本概念
+=========
+
+首先是熟悉的斐波那契数列，基本的递归代码：
+
+.. code::
+
+    def fib(n):
+        if n <0:
+            return -1
+        if n <= 1:
+            return n
+        else:
+            return fib(n-1) + fib(n-2)
+
+| 在n稍大的时候，因为会反复计算fib(n-2)等值，导致效率偏低。
+| 动态规划简单理解就是存储这些中间量，使得在要反复计算时可以直接取除对应的值。：
+
+.. code::
+
+    def fib(n):
+        res = [0, 1]
+        if n < 0:
+            return -1
+        if n <= 1:
+            return n
+        for i in range(2, n+1):
+            res.append(res[i-1]+res[i-2])
+        return res[-1]
+
+一般来说，会定义一个list存储中间量，然后一边计算一边存入这个list，最后list[-1]就是想要的结果。
+
+.. tip::
+
+    Python的标准库中，有个\ ``functools.lru_cache``\ 装饰器能简单地实现类似功能：
+
+    .. code::
+
+        from functools import lru_cache
+
+
+        @lru_cache()
+        def fib(n):
+            if n <0:
+                return -1
+            if n <= 1:
+                return n
+            else:
+                return fib(n-1) + fib(n-2)
+    
+    只需要在函数上增加一行代码即可。
+
+    | 这个装饰器可以配置2个参数：functools.lru_cache(maxsize=129, typed=False)。
+    | maxsize参数指定存储多少个中间量，缓存满了之后，旧的结果会丢弃以腾出空间，并且为了得到最佳性能，maxsize应该设为2的幂。
+    | typed参数如果设为True，会把不同参数类型得到的结果分开保存，如会区分1和1.0。
+    | 此外，由于这个装饰器使用字典存储结构，所以被装饰的函数其\ **所有参数必须是可散列的**\ 。
+
+类似例子
+=========
+
+\ **题1**\ lst = [1, 2, 4, 1, 7, 8, 3]，要求从中取任意个不相邻的数，求最大的和。
+
+| 从末尾或最初开始，每个数都有选或不选两个结果。
+| 选了lst[0]，就只能选或不选lst[2]，这样跳跃式选法。
+| 为了方便使用终止条件，从末尾开始选。
+
+| 终止条件：选到了lst[0]或lst[1]，再往前没有能选的数，于是结束。
+| lst[0]的情况：必须加上lst[0]
+| lst[1]的情况：选lst[0]和lst[1]之中更大的一个，也就是max(lst[0], lst[1])
+
+| 从末尾开始选，假设末尾索引是i，那么由于有选或不选两个结果，会有两个分支：
+| 选：A = func(i-2) + lst[i]
+| 不选：B = func(i-1)
+
+| 达成终止条件，然后比较max(A, B)就是普通解法：
+
+.. code::
+
+    def func(lst, i):
+        if len(lst) < 1:
+            return 0
+        if len(lst) < 2:
+            return lst[0]
+        if i == 0:
+            return lst[0]
+        if i == 1:
+            return max(lst[0], lst[1])
+        else:
+            A = func(lst, i-2) + lst[i]
+            B = func(lst, i-1)
+            return max(A, B)
+
+        
+    lst = [1, 2, 4, 1, 7, 8, 3]
+    func(lst, 6)
+
+接下来用动态规划：
+
+.. code::
+
+    def func(lst):
+        if len(lst) < 1:
+            return 0
+        if len(lst) < 2:
+            return lst[0]
+        res = [lst[0], max(lst[0], lst[1])]
+        for i in range(2, len(lst)):
+            res.append(max(res[i-2]+lst[i], res[i-1]))
+        return res[-1]
+
+
+    lst = [1, 2, 4, 1, 7, 8, 3]
+    func(lst)
+
+\ **题2**\ 全是正整数的lst = [3, 34, 4, 12, 5, 2], 再给定一个正整数S，如果lst中有任意数的和等于S，返回True，否则返回False。
+
+| 题目要求从lst中选一个子集subset，最终加起来等于给定的S。  
+| 同样的，按顺序对每个数有选或不选两种方案，选的话，要用S去减来继续算剩下的数，不选的话，就不用减。只要有一种方案成立，那么返回True。  
+| 终止条件：S减到0,返回True;处理到最后1个数，就要看S是否等于lst[0], 此外，如果lst[i]>S,肯定不会选。
+
+.. code::
+
+    def func(lst, i, S):
+        if S == 0:
+            return True
+        if i == 0:
+            return S == lst[0]
+        if lst[i] > S:
+            return func(lst, i-1, S)
+        else:
+            return func(lst, i-1, S-lst[i]) or func(lst, i-1, S)
+
+
+    lst = [3, 34, 4, 12, 5, 2]
+    S = 9
+    func(lst, len(lst)-1, S)
+
+再用动态规划改写：
+
+.. code::
+
+    import numpy as np
+
+
+    def func(lst, S):
+        if S == 0:
+            return True
+        res = np.zeros((len(lst), S+1), dtype=bool)
+        res[:, 0] = True
+        res[0, :] = False
+        res[0, lst[0]] = True
+        for i in range(1, len(lst)):
+            for j in range(1, S+1):
+                if lst[i] > j:
+                    res[i, j] = res[i-1, j]
+                else:
+                    res[i, j] = res[i-1, j-lst[i]] or res[i-1, j]
+        return res[-1, -1]
+
+
+    func(lst, 19)
