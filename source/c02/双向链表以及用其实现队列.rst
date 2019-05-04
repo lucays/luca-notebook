@@ -1,0 +1,209 @@
+=========================
+双向链表以及用其实现队列
+=========================
+
+
+一次被问到“如何实现出队入队都是\ ``O(1)``\ 的\ ``queue``\ ”，由于\ ``list``\ 实现会导致出队是\ ``O(n)``\ （首元素移除后，后续元素需要向前移位），只能使用双向链表来实现。不过当时很久没接触有点懵比，没写出来。
+
+实现双向链表
+==============
+
+网上的各种\ ``Python``\ 版实现实在是看不进去，下面是复习了一下概念后，自己实现的代码：
+
+.. code::
+
+    class Node:
+        def __init__(self, value=None, prev=None, next_=None):
+            self.value = value
+            self.prev = prev
+            self.next = next_
+
+
+    class DoublyLinkedList:
+        def __init__(self, value=None):
+            self.head = None
+            self.tail = None
+
+        def __len__(self):
+            curr = self.head
+            if curr is None:
+                return 0
+            count = 1
+            while curr and curr.next:
+                count += 1
+                curr = curr.next
+            return count
+
+        def __getitem__(self, index):
+            length = self.__len__()
+            if index >= length:
+                raise Exception(f'IndexError, index [{index}] is bigger or equal the doublylinkedlist length: {length}.')
+            if index == -1 or index == length - 1:
+                if self.tail:
+                    return self.tail.value
+                else:
+                    raise Exception('IndexError, index is bigger or equal the doublylinkedlist length.')
+            if index < 0:
+                count = -1
+                curr = self.tail
+                while curr:
+                    if index == count:
+                        return curr.value
+                    count -= 1
+                    curr = curr.prev
+            else:
+                count = 0
+                curr = self.head
+                while curr:
+                    if index == count:
+                        return curr.value
+                    count += 1
+                    curr = curr.next
+
+        def add(self, value):
+            '''
+            在头部插入节点
+            如果链表为空，更新self.head和self.tail为节点
+            '''
+            node = Node(value=value)
+            node.next = self.head
+            if self.head:
+                self.head.prev = node
+            else:
+                self.tail = node
+            self.head = node
+
+        def append(self, value):
+            '''
+            在尾部插入节点
+            如果链表为空，更新self.head和self.tail为节点
+            '''
+            node = Node(value=value)
+            node.prev = self.tail
+            if self.tail:
+                self.tail.next = node
+            else:
+                self.head = node
+            self.tail = node
+
+        def pop_head(self):
+            '''
+            返回头节点的值并删除
+            '''
+            if self.head is None:
+                raise Exception("can't pop_head, the doublylinkedlist is empty!")
+            value = self.head.value
+            if self.head.next:
+                self.head.next.prev = None
+            self.head = self.head.next
+            return value
+
+        def pop(self):
+            '''
+            返回尾节点的值并删除
+            '''
+            if self.tail is None:
+                raise Exception("can't pop, the doublylinkedlist is empty!")
+            value = self.tail.value
+            if self.tail.prev:
+                self.tail.prev.next = None
+            self.tail = self.tail.prev
+            if self.tail is None:
+                self.head = None
+            return value
+
+        def delete(self, index):
+            if index == 0:
+                self.pop_head()
+            elif index == -1:
+                self.pop()
+            else:
+                count = 0
+                curr = self.head
+                while curr and curr.next:
+                    if index == count:
+                        curr.prev.next = curr.next
+                        curr.next.prev = curr.prev
+                        curr.prev, curr.next = None, None
+                        break
+                    count += 1
+                    curr = curr.next
+                if count < index:
+                    raise Exception(f"the doublylinkedlist's length is {count}, smaller than you want")
+
+        def display(self):
+            curr = self.head
+            if self.head is None:
+                print('the doublylinkedlist is empty!')
+            while curr and curr.next:
+                print(f"{curr.value}->", end='')
+                curr = curr.next
+            if curr:
+                print(curr.value)
+
+
+    doubly_linked_list = DoublyLinkedList()
+
+    doubly_linked_list.add(0)
+    doubly_linked_list.append(1)
+    doubly_linked_list.append(2)
+    doubly_linked_list.append(3)
+    doubly_linked_list.append('str')
+    doubly_linked_list.append([1, 2, 3])
+    doubly_linked_list.add(99)
+    doubly_linked_list.add(98)
+    print('length:', len(doubly_linked_list))  # length: 8
+
+    doubly_linked_list.display()  # 98->99->0->1->2->3->str->[1, 2, 3]
+
+    doubly_linked_list.delete(0)
+    doubly_linked_list.delete(-1)
+    doubly_linked_list.delete(2)
+    doubly_linked_list.display()  # 99->0->2->3->str
+
+    value = doubly_linked_list.pop_head()
+    print('head value:', value)  # head value: 99
+    value = doubly_linked_list.pop()
+    print('tail value:', value)  # tail value: str
+    doubly_linked_list.display()  # 0->2->3
+    doubly_linked_list.pop()
+    print(doubly_linked_list[-1])  # 2
+    doubly_linked_list.pop()
+    doubly_linked_list.display()  # 0
+    print('---')
+    print(doubly_linked_list[0])  # 0
+    doubly_linked_list.pop()
+    print('length:', len(doubly_linked_list))  # length: 0
+    doubly_linked_list.display()  # the doublylinkedlist is empty!
+
+实现队列
+==========
+
+有了上述代码作为基础，队列的实现就很简单了：
+
+.. code::
+
+    class Queue:
+        def __init__(self):
+            self.queue = DoublyLinkedList()
+
+        def enqueue(self, value):
+            self.queue.append(value)
+
+        def dequeue(self):
+            return self.queue.pop_head()
+
+        def __getitem__(self, index):
+            return self.queue[index]
+
+
+    q = Queue()
+    q.enqueue(1)
+    q.enqueue(2)
+    q.enqueue(3)
+    val = q.dequeue()
+    print(val)  # 1
+    val = q.dequeue()
+    print(val)  # 2
+
+这样，入队用的\ ``append``\ 和出队用的\ ``pop_head``\ 都是\ ``O(1)``\ 的时间复杂度，就简单地实现了一个入队出队都是\ ``O(1)``\ 的队列。
