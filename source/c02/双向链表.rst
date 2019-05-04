@@ -1,0 +1,108 @@
+=========
+双向链表
+=========
+
+
+一次被问到“如何实现出队入队都是\ ``O(1)``\ 的\ ``queue``\ ”，由于\ ``list``\ 实现会导致出队是\ ``O(n)``\ （首元素移除后，后续元素需要向前移位），只能使用双向链表来实现。不过当时很久没接触有点懵比，没写出来。
+
+下面是复习了一下概念后，自己实现的代码：
+
+.. code::
+
+    class Node:
+        def __init__(self, value=None, prev=None, next_=None):
+            self.value = value
+            self.prev = prev
+            self.next = next_
+
+
+    class DoublyLinkedList:
+        def __init__(self, value=None):
+            self.head = None
+            self.tail = None
+
+        def push(self, value):
+            '''
+            在头部插入节点
+            如果链表为空，更新self.head和self.tail为节点
+            '''
+            node = Node(value=value)
+            node.next = self.head
+            if self.head is not None:
+                self.head.prev = node
+            else:
+                self.tail = node
+            self.head = node
+
+        def append(self, value):
+            '''
+            在尾部插入节点
+            如果链表为空，更新self.head和self.tail为节点
+            '''
+            node = Node(value=value)
+            node.prev = self.tail
+            if self.tail is not None:
+                self.tail.next = node
+            else:
+                self.head = node
+            self.tail = node
+
+        def delete(self, index):
+            if index == 0:
+                if self.head.next:
+                    self.head.next.prev = None
+                self.head = self.head.next
+            elif index == -1:
+                if self.tail.prev:
+                    self.tail.prev.next = None
+                self.tail = self.tail.prev
+            else:
+                count = 0
+                curr = self.head
+                while curr and curr.next:
+                    if index == count:
+                        curr.prev.next = curr.next
+                        curr.next.prev = curr.prev
+                        curr.prev, curr.next = None, None
+                        break
+                    count += 1
+                    curr = curr.next
+                if count < index:
+                    raise Exception(f"the doublylinkedlist's length is {count}, smaller than you want")
+
+        def __len__(self):
+            count = 1
+            curr = self.head
+            while curr and curr.next:
+                count += 1
+                curr = curr.next
+            return count
+
+        def display(self):
+            curr = self.head
+            while curr and curr.next:
+                print(f"{curr.value}->", end='')
+                curr = curr.next
+            if curr:
+                print(curr.value)
+
+
+    doubly_linked_list = DoublyLinkedList()
+
+    doubly_linked_list.push(0)
+    doubly_linked_list.append(1)
+    doubly_linked_list.append(2)
+    doubly_linked_list.append(3)
+    doubly_linked_list.append('str')
+    doubly_linked_list.append([1, 2, 3])
+    doubly_linked_list.push(99)
+    doubly_linked_list.push(98)
+    print('length: ', len(doubly_linked_list))  # length:  8
+
+    doubly_linked_list.display()  # 98->99->0->1->2->3->str->[1, 2, 3]
+
+    doubly_linked_list.delete(0)
+    doubly_linked_list.delete(-1)
+    doubly_linked_list.delete(6)  # Exception: the doublylinkedlist's length is 5, smaller than you want
+    doubly_linked_list.display()
+
