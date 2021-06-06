@@ -12,7 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 import sphinx_typlog_theme
@@ -133,7 +133,7 @@ html_favicon = '_static/favicon.png'
 html_logo = '_static/logo.png'
 
 # -- Options for LaTeX output ------------------------------------------------
-
+font_path = os.path.join(os.getcwd(), 'fonts') + '/'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
@@ -152,21 +152,15 @@ latex_elements = {
     # 'figure_align': 'htbp',
     'sphinxsetup': 'attentionBorderColor={rgb}{0.012,0.663,0.957}, noteBorderColor={rgb}{0.012,0.663,0.957}, tipBorderColor={rgb}{1,0.412,0.706}',
     'preamble': r'''
-    \hypersetup{unicode=true}
-    \usepackage{CJKutf8}
-    \DeclareUnicodeCharacter{00A0}{\nobreakspace}
-    \DeclareUnicodeCharacter{2203}{\ensuremath{\exists}}
-    \DeclareUnicodeCharacter{2200}{\ensuremath{\forall}}
-    \DeclareUnicodeCharacter{2286}{\ensuremath{\subseteq}}
-    \DeclareUnicodeCharacter{2713}{x}
-    \DeclareUnicodeCharacter{27FA}{\ensuremath{\Longleftrightarrow}}
-    \DeclareUnicodeCharacter{221A}{\ensuremath{\sqrt{}}}
-    \DeclareUnicodeCharacter{221B}{\ensuremath{\sqrt[3]{}}}
-    \DeclareUnicodeCharacter{2295}{\ensuremath{\oplus}}
-    \DeclareUnicodeCharacter{2297}{\ensuremath{\otimes}}
-    \begin{CJK}{UTF8}{gbsn}
-    \AtEndDocument{\end{CJK}}
-    ''',
+        \usepackage[UTF8]{ctex}
+        \usepackage{ulem}
+        \newcommand*{\DUrolestrike}{\sout}
+        \xeCJKsetup{CJKspace=true}
+        \xeCJKDeclareCharClass{CJK}{`①,`②,`③,`④,`⑤,`⇄,`●,`∀}
+        \setCJKmainfont[Path=%s,BoldFont={NotoSerifCJKsc-Bold.otf},ItalicFont={NotoSerifCJKsc-Light.otf}]{NotoSansCJKsc-Light.otf}
+        \setCJKsansfont[Path=%s,BoldFont={NotoSansCJKsc-Bold.otf},ItalicFont={NotoSerifCJKsc-Light.otf}]{NotoSansCJKsc-Light.otf}
+        \setCJKmonofont[Path=%s,BoldFont={NotoSansMonoCJKsc-Bold.otf},ItalicFont={NotoSansMonoCJKsc-Regular.otf}]{NotoSansMonoCJKsc-Regular.otf}
+    ''' % (font_path, font_path, font_path),
     'figure_align': 'H',
 }
 # Grouping the document tree into LaTeX files. List of tuples
